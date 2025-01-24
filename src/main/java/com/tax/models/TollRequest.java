@@ -17,6 +17,6 @@ public class TollRequest {
     private List<LocalDateTime> dates;
 
     @NonNull
-    private Vehicle vehicle;
+    private String vehicle;
 
 }

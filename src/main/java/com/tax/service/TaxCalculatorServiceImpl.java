@@ -4,7 +4,7 @@ import com.tax.models.TollRequest;
 import com.tax.models.TollEntry;
 import com.tax.models.TollResponse;
 import com.tax.models.enums.TollRangeCharges;
-import com.tax.models.vehicle.Vehicle;
+import com.tax.models.vehicle.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +33,8 @@ public class TaxCalculatorServiceImpl implements TaxCalculatorService {
         tollFreeVehicles.put("Military", 5);
     }
 
+    private final BigDecimal MAX_DAILY_FEE = BigDecimal.valueOf(60);
+
     private static final List<LocalDateTime> HOLIDAY_LIST = List.of(
             LocalDateTime.of(2013, 1, 1, 0, 0),
             LocalDateTime.of(2013, 3, 29, 0, 0),
@@ -49,10 +51,10 @@ public class TaxCalculatorServiceImpl implements TaxCalculatorService {
 
     @Override
     public TollResponse calculateTax(TollRequest tollRequest) {
-
-        if (isTollFreeVehicle(tollRequest.getVehicle()))
+        Vehicle vehicle = getVehicleType(tollRequest.getVehicle());
+        if (isTollFreeVehicle(vehicle))
             return TollResponse.builder()
-                .totalFees(BigDecimal.ZERO).vehicle(tollRequest.getVehicle()).build();
+                .totalFees(BigDecimal.ZERO).vehicle(vehicle.getVehicleType()).build();
 
         List<TollEntry> tollEntries = tollRequest.getDates().stream()
                         .filter(date -> date.getYear() == 2013)
@@ -66,7 +68,7 @@ public class TaxCalculatorServiceImpl implements TaxCalculatorService {
             log.error("No toll entries found for the given dates");
             return TollResponse.builder()
                     .totalFees(BigDecimal.ZERO)
-                    .vehicle(tollRequest.getVehicle())
+                    .vehicle(vehicle.getVehicleType())
                     .build();
         }
 
@@ -76,7 +78,7 @@ public class TaxCalculatorServiceImpl implements TaxCalculatorService {
 
         return TollResponse.builder()
                 .totalFees(totalFee)
-                .vehicle(tollRequest.getVehicle())
+                .vehicle(vehicle.getVehicleType())
                 .build();
 
     }
@@ -114,14 +116,33 @@ public class TaxCalculatorServiceImpl implements TaxCalculatorService {
             log.info("Running daily fee: {}", dailyFee);
         }
 
-        if (dailyFee.compareTo(BigDecimal.valueOf(60)) > 0) {
-            dailyFee = BigDecimal.valueOf(60);
+        if (dailyFee.compareTo(MAX_DAILY_FEE) > 0) {
+            dailyFee = MAX_DAILY_FEE;
         }
 
         return dailyFee;
     }
 
-
+    private Vehicle getVehicleType(String vehicleType) {
+        switch (vehicleType) {
+            case "Car":
+                return new Car();
+            case "Motorbike":
+                return new Motorbike();
+            case "Bus":
+                return new Bus();
+            case "Emergency":
+                return new Emergency();
+            case "Diplomat":
+                return new Diplomat();
+            case "Foreign":
+                return new Foreign();
+            case "Military":
+                return new Military();
+            default:
+                return new Car();
+        }
+    }
 
     private boolean isWithinAnHour(LocalDateTime start, LocalDateTime end) {
         log.info("Start: {} End: {} Diff: {}", start, end, end.minusHours(1).isBefore(start));

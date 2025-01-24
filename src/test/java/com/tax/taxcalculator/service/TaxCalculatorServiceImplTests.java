@@ -44,7 +44,7 @@ public class TaxCalculatorServiceImplTests {
         );
 
         TollResponse tollResponse = taxCalculatorService.calculateTax(
-                TollRequest.builder().dates(dates).vehicle(new Car()).build()
+                TollRequest.builder().dates(dates).vehicle("Car").build()
         );
 
         assertEquals(new BigDecimal(29), tollResponse.getTotalFees());
@@ -72,7 +72,7 @@ public class TaxCalculatorServiceImplTests {
         );
 
         TollResponse tollResponse = taxCalculatorService.calculateTax(
-                TollRequest.builder().dates(dates).vehicle(new Car()).build()
+                TollRequest.builder().dates(dates).vehicle("Car").build()
         );
 
         assertEquals(new BigDecimal(89),  tollResponse.getTotalFees());
@@ -81,7 +81,7 @@ public class TaxCalculatorServiceImplTests {
     @Test
     void testComputeEmergencyVehicleFee() {
         TollResponse tollResponse = taxCalculatorService.calculateTax(
-                TollRequest.builder().dates(List.of(LocalDateTime.of(2013, 1, 6, 21, 0, 0))).vehicle(new Emergency()).build()
+                TollRequest.builder().dates(List.of(LocalDateTime.of(2013, 1, 6, 21, 0, 0))).vehicle("Emergency").build()
         );
 
         assertEquals(new BigDecimal(0), tollResponse.getTotalFees());

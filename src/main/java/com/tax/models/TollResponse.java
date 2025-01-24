@@ -9,6 +9,6 @@ import java.math.BigDecimal;
 @Data
 @Builder
 public class TollResponse {
-    private Vehicle vehicle;
+    private String vehicle;
     private BigDecimal totalFees;
 }
