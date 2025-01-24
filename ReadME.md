@@ -3,6 +3,7 @@
 1. Clone the project
 2. Run the project using the following command
 ```bash
+mvn clean install
 mvn spring-boot:run
 ```
 3. The project will run on the following URL
